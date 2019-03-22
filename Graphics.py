@@ -5,10 +5,6 @@ Created on Thu Dec 28 21:21:32 2017
 @author: Cobi
 """
 
-from ThingClass import Thingy
-from ViewingSensor import Sensor
-from UniverseClass import Universe 
-
 import numpy as np
 import pygame
 #pygame.init()
@@ -28,7 +24,7 @@ class ViewScreen:
         pygame.display.quit()
         pygame.quit()
 
-    def draw_viewer(self,univ,viewer):
+    def draw_visible(self,univ,viewer):
         """Takes in a universe and a sensor and displays onscreen the view from
         that sensor"""
         assert(viewer.loc.dim()==2)
@@ -40,7 +36,7 @@ class ViewScreen:
 
         self.draw_circle((0,255,0),viewer.loc,radius=5)  #green is you
         for event in viewer.get_visible():
-            self.draw_circle((0,0,255),event.loc,radius=5)  #blue is you seeing them
+            self.draw_circle((0,0,255),event.get_image().loc,radius=5)  #blue is you seeing them
         pygame.display.flip()
         
     def get_keys(self):
