@@ -8,6 +8,7 @@ import numpy as np
 from ViewingSensor import Sensor
 from WorldlineClass import Worldline
 from LocationClass import Location
+import struct
 
 
 class Physical:
@@ -17,18 +18,22 @@ class Physical:
     a Sensor which is the way it perceives other Physicals.
     
     Note: this class is meant to be extended to specific physical objects (for
-    example, Ships or Asteroids). BE SURE TO OVERWRITE THE compress() AND
-    decompress() METHODS!
+    example, Ships or Asteroids). BE SURE TO OVERWRITE THE compress(), decompress()
+    AND draw() METHODS!
     """
+
+    default_color = (255,255,255) # Default to white
+    default_size = 5 # 5 px radius
+
     
     def __init__(self,x,v,t,univ,isghost=False):
         """If isghost, the Physical is built as normal but without informing
         the Universe or building a Worldline for it."""
         self.univ = univ
         self.loc = Location(t,x)
-        if self.loc.dim()==1:
-            v = [v]
         self.v = np.array(v)
+        if len(self.v.shape) == 0:
+            self.v = self.v[None] # bump scalar velocity to 1D array
         assert(len(self.v) == self.loc.dim())
         #Finished with descriptive fields. Now add to Universe
         self.linekey = None
@@ -80,9 +85,9 @@ class Physical:
         return self.sensor.get_visible()
         
 ###-------------------------------------------------------------------------### BELOW THIS LINE IS STILL TO DO
-    def compress(self):
+    def __str__(self):
         """give enough info to reconstruct the Physical as it was at this
-        current point in spacetime, in as short a string as possible"""
+        current point in spacetime, in human-readable format"""
         descrip = "L%0.2f" %self.loc.t
         for coord in self.loc.space():
             descrip += ",%0.2f" %coord
@@ -92,14 +97,28 @@ class Physical:
         descrip += "END"
         return descrip
     
+    def compress(self):
+        """give enough info to reconstruct the Physical as it was at this
+        current point in spacetime, in as short a string as possible"""
+        space = self.loc.space()
+        ndim = len(space)
+        fmt = ">f" + "f" * ndim * 2
+        pos_vel = [y for x in [space, self.v] for y in x]
+        descrip = struct.pack(fmt, self.loc.t, *pos_vel)
+
+        return descrip
+
+    @staticmethod
     def decompress(cipherstring):
         """take in a compressed string following the compress method convention
         and returns a ghost Physical that matches the description.
         Note that this is a class method, NOT a instance method."""
-        indxL = cipherstring.index("L")
-        indxV = cipherstring.index("V")
-        endex = cipherstring.index("END")
-        tx = [float(x) for x in cipherstring[indxL+1:indxV].split(",")]
-        v  = [float(x) for x in cipherstring[indxV+1:endex].split(",")]
-        return Physical(tx[1:],v,tx[0],None,isghost=True)
-    
+        ndim = len(cipherstring) // 8  # everything is 4-byte floats
+        fmt = ">f" + "f" * ndim * 2
+        info = struct.unpack(fmt, cipherstring)
+        t = info[0]
+        pos = info[1:ndim + 1]
+        v = info[ndim + 1:(2*ndim)+1]
+
+        return Physical(pos, v, t, None, isghost=True)
+
