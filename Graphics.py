@@ -11,13 +11,14 @@ import pygame
 
 
 class ViewScreen:
-    def __init__(self):
+    def __init__(self, view_real=False):
         pygame.display.init()
         pygame.event.set_allowed(None)
         pygame.event.set_allowed(pygame.KEYDOWN)
         pygame.key.set_repeat(5,5)  #5 ms delay, 5 ms interval b/w KEYDOWN events
-        self.screen = pygame.display.set_mode((640, 240))  #type(screen) = pygame.Surface
+        self.screen = pygame.display.set_mode((640, 400))  #type(screen) = pygame.Surface
         self.screen.fill((0,0,0))  #black
+        self.view_real = view_real
 
     def close(self):
         self.screen = None
@@ -30,9 +31,10 @@ class ViewScreen:
         assert(viewer.loc.dim()==2)
         viewer.observe()
         self.screen.fill((0,0,0))
-    
-        for thing in univ.Physicals.values():
-            self.draw_circle((255,0,0),thing.loc,radius=3)  #red is real AND CHEATING      
+
+        if self.view_real:
+            for thing in univ.Physicals.values():
+                self.draw_circle((255,0,0),thing.loc,radius=3)  #red is real AND CHEATING
 
         self.draw_circle((0,255,0),viewer.loc,radius=5)  #green is you
         for event in viewer.get_visible():
