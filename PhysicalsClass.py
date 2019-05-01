@@ -4,10 +4,12 @@ Created on Thu Sep 20 16:56:19 2018
 
 @author: Cobi
 """
-import numpy as np
+
 from ViewingSensor import Sensor
 from WorldlineClass import Worldline
 from LocationClass import Location
+import numpy as np
+import pygame
 import struct
 
 
@@ -83,7 +85,16 @@ class Physical:
     def see_visible(self):
         """return a list of all Events that this Physical can see"""
         return self.sensor.get_visible()
-        
+
+    def draw(self,screen, color=None, radius=None):
+        if radius is None:
+            radius = self.default_size
+        if color is None:
+            color = self.default_color
+
+        loc = np.array([self.loc.x, self.loc.y]).astype(int)
+
+        pygame.draw.circle(screen, color, loc, radius)
 ###-------------------------------------------------------------------------### BELOW THIS LINE IS STILL TO DO
     def __str__(self):
         """give enough info to reconstruct the Physical as it was at this

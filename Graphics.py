@@ -26,19 +26,26 @@ class ViewScreen:
         pygame.quit()
 
     def draw_visible(self,univ,viewer):
-        """Takes in a universe and a sensor and displays onscreen the view from
-        that sensor"""
+        """
+        Takes in a universe and a physical and displays onscreen the view from
+        that physical.
+
+        :param univ: UniverseClass.Universe
+        :param viewer: PhysicalsClass.Physical
+        """
         assert(viewer.loc.dim()==2)
         viewer.observe()
         self.screen.fill((0,0,0))
 
         if self.view_real:
             for thing in univ.Physicals.values():
-                self.draw_circle((255,0,0),thing.loc,radius=3)  #red is real AND CHEATING
+                thing.draw(self.screen,color=(255,0,0),radius=3) #red is real AND CHEATING
 
-        self.draw_circle((0,255,0),viewer.loc,radius=5)  #green is you
-        for event in viewer.get_visible():
-            self.draw_circle((0,0,255),event.get_image().loc,radius=5)  #blue is you seeing them
+        viewer.draw(self.screen, color=(0,255,0), radius=5)  #green is you
+
+        for event in viewer.sensor.get_visible():
+            event.get_image().draw(self.screen, color= (0,0,255), radius=5)  #blue is you seeing them
+
         pygame.display.flip()
         
     def get_keys(self):
@@ -49,8 +56,4 @@ class ViewScreen:
             self.close()
         return letters
     
-    def draw_circle(self,color,loc,radius):
-        x = int(np.round(loc.x))
-        y = int(np.round(loc.y))
-        pygame.draw.circle(self.screen,color,(x,y),radius,0)
 
