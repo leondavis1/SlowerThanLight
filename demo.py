@@ -5,9 +5,9 @@ Created on Mon Dec  4 22:52:40 2017
 @author: Cobi
 """
 #import matplotlib.pyplot as plt
-from UniverseClass import Universe
-from Graphics import ViewScreen
-from PhysicalsClass import Physical
+from universe import Universe
+from graphics import ViewScreen
+from physical import Physical
 
 import time
 

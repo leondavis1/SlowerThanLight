@@ -5,8 +5,8 @@ Created on Thu Sep 20 16:57:26 2018
 @author: Cobi
 """
 import numpy as np
-from EventClass import Event
-from LocationClass import Location
+from events import Event
+from location import Location
 
         
 class Worldline:

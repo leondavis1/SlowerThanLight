@@ -5,9 +5,9 @@ Created on Thu Sep 20 16:56:19 2018
 @author: Cobi
 """
 
-from ViewingSensor import Sensor
-from WorldlineClass import Worldline
-from LocationClass import Location
+from sensor import Sensor
+from worldline import Worldline
+from location import Location
 import numpy as np
 import pygame
 import struct
