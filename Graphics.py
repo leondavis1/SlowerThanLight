@@ -31,7 +31,7 @@ class ViewScreen:
         that physical.
 
         :param univ: UniverseClass.Universe
-        :param viewer: PhysicalsClass.Physical
+        :param viewer: SensorClass.Sensor
         """
         assert(viewer.loc.dim()==2)
         viewer.observe()
@@ -41,9 +41,11 @@ class ViewScreen:
             for thing in univ.Physicals.values():
                 thing.draw(self.screen,color=(255,0,0),radius=3) #red is real AND CHEATING
 
-        viewer.draw(self.screen, color=(0,255,0), radius=5)  #green is you
+        if viewer.key is not None:
+            viewer_phys = univ.get_physical(viewer.key)
+            viewer_phys.draw(self.screen, color=(0,255,0), radius=5)  #green is you
 
-        for event in viewer.sensor.get_visible():
+        for event in viewer.get_visible():
             event.get_image().draw(self.screen, color= (0,0,255), radius=5)  #blue is you seeing them
 
         pygame.display.flip()

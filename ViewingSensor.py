@@ -14,6 +14,7 @@ class Sensor:
     """
     
     def __init__(self, loc, univ, ownkey=None):
+        self.key = ownkey
         self.univ = univ
         self.watchedlines = [] #pairs: 1st is Worldline id, 2nd is latest Event or None
         self.loc = loc
