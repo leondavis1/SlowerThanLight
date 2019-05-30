@@ -57,13 +57,14 @@ def main():
         othership = Physical((100, 100), (0, 0), 0, univ, watches=False)
         scattered = []
 
-        for i in range(10):
+        for i in range(100):
             p = Physical((i * 3, i * 3), (0, 0), 0, univ, watches=False)
             scattered.append(p)
 
+        n=0
+        avg_time = 0
+
         while keeplooping:
-            n=0
-            avg_time = 0
             t0 = pygame.time.get_ticks()
             univ.increment(dt=1)
             viewscreen.draw_visible(univ, myship.sensor)
@@ -102,7 +103,7 @@ def main():
                 print(len(othership.get_worldline().eventlist))
             if myship.loc.t // 1000 > 3:
                 keeplooping = False
-            pygame.time.wait(10-(t1-t0))
+            # pygame.time.wait(10-(t1-t0))
 
 
         viewscreen.close()
@@ -113,6 +114,7 @@ def main():
 
 
 if __name__ == "__main__":
+    pygame.init()
     parser = make_parser()
     args = parser.parse_args()
     pf = cProfile.Profile()
