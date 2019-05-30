@@ -38,7 +38,7 @@ class ViewScreen:
         self.screen.fill((0,0,0))
 
         if self.view_real:
-            for thing in univ.Physicals.values():
+            for thing in univ.Physicals:
                 thing.draw(self.screen,color=(255,0,0),radius=3) #red is real AND CHEATING
 
         if viewer.key is not None:
@@ -57,5 +57,5 @@ class ViewScreen:
         if 'Q' in letters:  #hardcoded quit
             self.close()
         return letters
-    
+
 

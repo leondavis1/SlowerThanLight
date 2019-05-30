@@ -13,8 +13,8 @@ class Event(Location):
     used to see what had happened at this Event.
     """
     
-    def __init__(self,loc,phystype,descrip):
-        super().__init__(loc.t,loc.x,y=loc.y,z=loc.z)
+    def __init__(self, loc, phystype, descrip):
+        super().__init__(loc.t, loc.x, y=loc.y, z=loc.z)
         self.descrip = descrip
         self.phystype = phystype
     
@@ -30,4 +30,3 @@ class Event(Location):
         the description of this event. That Physical is a 'ghost': not
         registered with the Universe and has no Worldline"""
         return self.phystype.decompress(self.descrip)
-    

@@ -8,9 +8,31 @@ Created on Mon Dec  4 22:52:40 2017
 from universe import Universe
 from graphics import ViewScreen
 from physical import Physical
+import argparse
+import pygame.time
+import numpy as np
+import cProfile, pstats
+from contextlib import contextmanager
 
-import time
 
+def make_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-profile',)
+    return parser
+
+
+@contextmanager
+def profile(formatted_output=None):
+    pf = cProfile.Profile()
+    pf.enable()
+    try:
+        yield pf
+    finally:
+        pf.disable()
+        with open(formatted_output, 'w') as out:
+            ps = pstats.Stats(pf, stream=out)
+            ps.sort_stats('tottime')
+            ps.print_stats()
 
 def ship_controls(myship,keyspressed):
     if 'a' in keyspressed:
@@ -24,53 +46,82 @@ def ship_controls(myship,keyspressed):
     if "c" in keyspressed:
         myship.boost((-1*myship.v[0],-1*myship.v[1]))
 
-if __name__ == "__main__":
+
+def main():
     try:
         #####----TWO DIMENTIONAL OPERATION----####
         viewscreen = ViewScreen(True)
         keeplooping = True
         univ = Universe(lightspeed=1)
-        myship = Physical((0,0),(0,0),0,univ)
-        othership = Physical((100,100),(0,0),0,univ)
+        myship = Physical((0, 0), (0, 0), 0, univ)
+        othership = Physical((100, 100), (0, 0), 0, univ, watches=False)
+        scattered = []
+
+        for i in range(10):
+            p = Physical((i * 3, i * 3), (0, 0), 0, univ, watches=False)
+            scattered.append(p)
 
         while keeplooping:
-            startclock = time.perf_counter()
+            n=0
+            avg_time = 0
+            t0 = pygame.time.get_ticks()
             univ.increment(dt=1)
-            viewscreen.draw_visible(univ,myship.sensor)
+            viewscreen.draw_visible(univ, myship.sensor)
             letters = viewscreen.get_keys()
-            ship_controls(myship,letters)
+            ship_controls(myship, letters)
             if "Q" in letters:
                 keeplooping = False
-            while time.perf_counter() - startclock < 0.005: #5 ms, or 200FPS
-                time.sleep(0.0005) #wait 1/2 ms
 
-            #make the other ship dance around a bit
-            shipclock = othership.loc.t%1000
-            if 0<shipclock<30:
-                othership.boost((.01,0))
-            if 600<shipclock<630:
-                othership.boost((-.01,0))
-            if 500<shipclock<530:
-                othership.boost((-.02,0))
-            if 800<shipclock<830:
-                othership.boost((.02,0))
-            if 50<shipclock<60:
-                othership.boost((0,.1))
-            if 150<shipclock<160:
-                othership.boost((0,-.1))
-            if 300<shipclock<350:
-                othership.boost((0,-.01))
-            if 500<shipclock<550:
-                othership.boost((0,.01))
+            # make the other ship dance around a bit
+            shipclock = othership.loc.t % 1000
+            if 0 < shipclock < 30:
+                othership.boost((.01, 0))
+            if 600 < shipclock < 630:
+                othership.boost((-.01, 0))
+            if 500 < shipclock < 530:
+                othership.boost((-.02, 0))
+            if 800 < shipclock < 830:
+                othership.boost((.02, 0))
+            if 50 < shipclock < 60:
+                othership.boost((0, .1))
+            if 150 < shipclock < 160:
+                othership.boost((0, -.1))
+            if 300 < shipclock < 350:
+                othership.boost((0, -.01))
+            if 500 < shipclock < 550:
+                othership.boost((0, .01))
 
-            if shipclock%1000==0:
+            for s in scattered:
+                dv = np.random.rand(2) - 0.5
+                s.boost(0.1 * dv)
+            t1 = pygame.time.get_ticks()
+            avg_time = avg_time*n/(n+1) + (t1 - t0)/(n+1)
+
+            if shipclock % 100 == 0:
+                print("Average loop time: %f ms" % avg_time)
                 print(len(othership.get_worldline().eventlist))
+            if myship.loc.t // 1000 > 3:
+                keeplooping = False
+            pygame.time.wait(10-(t1-t0))
+
 
         viewscreen.close()
 
     except Exception as e:
         viewscreen.close()
         raise e
+
+
+if __name__ == "__main__":
+    parser = make_parser()
+    args = parser.parse_args()
+    pf = cProfile.Profile()
+    if args.profile:
+        with profile(args.profile):
+            main()
+
+    else:
+        main()
 
 
     ######----TWO DIMENTIONAL TEST----####

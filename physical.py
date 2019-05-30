@@ -27,33 +27,49 @@ class Physical:
     default_color = (255,255,255) # Default to white
     default_size = 5 # 5 px radius
 
-    
-    def __init__(self,x,v,t,univ,isghost=False):
-        """If isghost, the Physical is built as normal but without informing
-        the Universe or building a Worldline for it."""
+    def __init__(self, x, v, t, univ, isghost=False, watches=True):
+        """
+        :param x: Position of the Physical
+        :param v: Velocity of the Physical
+        :param t: Time of the Physical
+        :param univ:
+        :param isghost {bool}: if True, the Physical is built without
+        updating the Universe or any Sensors. Default False
+        :param watches {bool}: If True, the Physical has a Sensor
+        attached to it, that tracks where it sees the other Physicals in this Universe.
+        Defaults to True.
+        """
         self.univ = univ
         self.loc = Location(t,x)
         self.v = np.array(v)
         if len(self.v.shape) == 0:
-            self.v = self.v[None] # bump scalar velocity to 1D array
+            self.v = self.v[None]  # bump scalar velocity to 1D array
+
         assert(len(self.v) == self.loc.dim())
+
+        self.sensor = None
         #Finished with descriptive fields. Now add to Universe
         self.linekey = None
         self.key = None
+
         if not isghost:
             worldline = Worldline(univ) #build new Worldline (it adds itself to to univ.History)
             worldline.add_event(self.loc,type(self),self.compress())
             self.linekey = worldline.key
-            self.sensor = Sensor(self.loc,univ,ownkey=self.linekey)
+            if watches:
+                self.sensor = Sensor(self.loc, univ, ownkey=self.linekey)
             #inform rest of Universe about the new Worldline
-            for physkey, phys in univ.Physicals.items():
-                phys.sensor.watch_new_line(self.linekey)
+            for phys in univ.Physicals:
+                phys.watch_new_line(self.linekey)
             self.key = univ.add_physical(self)
 
-    def boost(self,dv):
-        if self.loc.dim() ==1:
+    def watch_new_line(self, key):
+        if self.sensor is not None:
+            self.sensor.watch_new_line(key)
+
+    def boost(self, dv):
+        if self.loc.dim() == 1:
             dv = [dv]
-        dv = np.array(dv)
         self.v = self.v + dv
         if np.sum(self.v**2) > self.univ.lightspeed**2:  #can't exceed lightspeed
             self.v = (self.v / np.sqrt(np.sum(self.v**2)))*(self.univ.lightspeed*0.999)
@@ -66,7 +82,8 @@ class Physical:
         if self.loc.dim()>=2: self.loc.y += self.v[1]*dt
         if self.loc.dim()>=3: self.loc.z += self.v[2]*dt
         self.univ.get_worldline(self.linekey).add_event(self.loc,type(self),self.compress())
-        self.sensor.loc = self.loc #update sensor so it knows where its Physical is
+        if self.sensor is not None:
+            self.sensor.loc = self.loc  #update sensor so it knows where its Physical is
 
     def destroy(self):
         self.univ.del_physical(self.key)

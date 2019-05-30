@@ -22,7 +22,7 @@ class Worldline:
         self.univ = univ   ###-------------------------------------------------might just want lightspeed?
         self.timer = 0  #time since latest event added. See self.prune and univ.increment
         
-    def add_event(self,loc,phystype,descrip):      
+    def add_event(self,loc, phystype, descrip):
         ev = Event(loc,phystype,descrip)
         if len(self.eventlist)>0:
             if ev.t > self.eventlist[-1].t:  #adding in chronological order

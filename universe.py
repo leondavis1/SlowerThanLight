@@ -9,14 +9,22 @@ class Universe:
     """All of the physical objects, and their history as Worldlines, in a
     single causally-connected universe.  Objects with different Universes
     have no way to interact"""
-    
-    def __init__(self,lightspeed=5,radius=500):
-        self.Physicals = {} #dictionary of Physicals
+
+    MAX_PHYSICALS = 10000
+
+    def __init__(self,lightspeed=5,radius=500, max_physicals=None):
+        self.max_physicals = max_physicals if max_physicals is not None else self.MAX_PHYSICALS
+
+        self._physicals = [None] * self.max_physicals #list of Physicals
         self.physicals_counter = 0
         self.History = [] #list of Worldlines, indexed so History[Worldline.key] gets corresponding Worldline
         self.worldline_counter = 0
         self.lightspeed = lightspeed
         self.radius = radius #radius of the universe
+
+    @property
+    def Physicals(self):
+        return [p for p in self._physicals if p is not None]
     
     def increment(self,dt=1):
         """Perform a timestep of length dt of the universe. Move physical
@@ -24,7 +32,7 @@ class Universe:
         for line in self.History:
             line.timer += dt
             line.prune()
-        for thing in self.Physicals.values():
+        for thing in self.Physicals:
             thing.drift(dt)
 
     def add_worldline(self,line):
@@ -48,11 +56,11 @@ class Universe:
         """Give a new Physical, add it to the Universe's list of objects"""
         key = self.physicals_counter
         self.physicals_counter = (self.physicals_counter+1)%10000  ###---------------limit 10,000 distinct thingies
-        self.Physicals[key] = physical
+        self._physicals[key] = physical
         return key
 
     def get_physical(self,physkey):
-        return self.Physicals[physkey]
+        return self._physicals[physkey]
     
     def del_physical(self,physkey):
-        del self.Physicals[physkey]
+        self._physicals[physkey] = None
