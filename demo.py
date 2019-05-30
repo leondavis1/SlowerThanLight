@@ -18,6 +18,8 @@ from contextlib import contextmanager
 def make_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-profile',)
+    parser.add_argument('--framerate',default=20, type=int,
+                        help="Framerate in milliseconds per frame")
     return parser
 
 
@@ -34,20 +36,21 @@ def profile(formatted_output=None):
             ps.sort_stats('tottime')
             ps.print_stats()
 
-def ship_controls(myship,keyspressed):
+def ship_controls(myship,keyspressed,step_size=1):
+    step = step_size * .01
     if 'a' in keyspressed:
-        myship.boost((-.01,0))
+        myship.boost((-step,0))
     if 'd' in keyspressed:
-        myship.boost((0.01,0))
+        myship.boost((step,0))
     if 'w' in keyspressed:
-        myship.boost((0,-.01))
+        myship.boost((0,-step))
     if 's' in keyspressed:
-        myship.boost((0,0.01))
+        myship.boost((0,step))
     if "c" in keyspressed:
         myship.boost((-1*myship.v[0],-1*myship.v[1]))
 
 
-def main():
+def main(args):
     try:
         #####----TWO DIMENTIONAL OPERATION----####
         viewscreen = ViewScreen(True)
@@ -57,21 +60,23 @@ def main():
         othership = Physical((100, 100), (0, 0), 0, univ, watches=False)
         scattered = []
 
-        for i in range(100):
+        for i in range(1000):
             p = Physical((i * 3, i * 3), (0, 0), 0, univ, watches=False)
             scattered.append(p)
 
         n=0
         avg_time = 0
+        rate = args.framerate
+        dt = rate/5  # Five units per ms
 
-        while keeplooping:
+        while True:
             t0 = pygame.time.get_ticks()
-            univ.increment(dt=1)
+            univ.increment(dt=dt)
             viewscreen.draw_visible(univ, myship.sensor)
             letters = viewscreen.get_keys()
-            ship_controls(myship, letters)
+            ship_controls(myship, letters,dt)
             if "Q" in letters:
-                keeplooping = False
+                break
 
             # make the other ship dance around a bit
             shipclock = othership.loc.t % 1000
@@ -96,15 +101,17 @@ def main():
                 dv = np.random.rand(2) - 0.5
                 s.boost(0.1 * dv)
             t1 = pygame.time.get_ticks()
-            avg_time = avg_time*n/(n+1) + (t1 - t0)/(n+1)
+            pygame.time.wait(rate-(t1-t0)) # Make the framerate actually work
+
+            # If running too slowly, increase dt
+            if rate < (t1-t0) < 100:
+                rate = max(t1-t0, 100)
+                dt = rate/5
+                print("updated framerate to %f"%rate)
 
             if shipclock % 100 == 0:
-                print("Average loop time: %f ms" % avg_time)
                 print(len(othership.get_worldline().eventlist))
-            if myship.loc.t // 1000 > 3:
-                keeplooping = False
-            # pygame.time.wait(10-(t1-t0))
-
+                print(rate)
 
         viewscreen.close()
 
@@ -120,10 +127,10 @@ if __name__ == "__main__":
     pf = cProfile.Profile()
     if args.profile:
         with profile(args.profile):
-            main()
+            main(args)
 
     else:
-        main()
+        main(args)
 
 
     ######----TWO DIMENTIONAL TEST----####
