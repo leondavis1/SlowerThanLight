@@ -17,9 +17,6 @@ class Location:
         """
     def __init__(self,t,x,y=None,z=None):
         self.t=t
-        self.x=None
-        self.y=None
-        self.z=None
         try:
             d = len(x) #if x is a single real number this raises TypeError
             self.x = x[0]
@@ -39,5 +36,5 @@ class Location:
         assert(self.dim() == loc2.dim())
         return np.sqrt(np.sum((self.space() - loc2.space())**2))
     
-    def duplicopy(self):
+    def clone(self):
         return Location(self.t,self.x,self.y,self.z)

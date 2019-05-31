@@ -5,8 +5,8 @@ Created on Thu Sep 20 16:57:26 2018
 @author: Cobi
 """
 import numpy as np
-from events import Event
-from location import Location
+from SlowerThanLight.events import Event
+from SlowerThanLight.location import Location
 
         
 class Worldline:

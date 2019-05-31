@@ -5,9 +5,9 @@ Created on Mon Dec  4 22:52:40 2017
 @author: Cobi
 """
 #import matplotlib.pyplot as plt
-from universe import Universe
-from graphics import ViewScreen
-from physical import Physical
+from SlowerThanLight.universe import Universe
+from SlowerThanLight.graphics import ViewScreen
+from SlowerThanLight.physical import Physical
 import argparse
 import pygame.time
 import numpy as np

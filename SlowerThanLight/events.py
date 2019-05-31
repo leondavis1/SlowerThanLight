@@ -4,7 +4,7 @@ Created on Wed Mar 20 14:54:39 2019
 
 @author: Cobi
 """
-from location import Location
+from SlowerThanLight.location import Location
 
 class Event(Location):
     """A location in space-time and the type and parameters of the Physical object

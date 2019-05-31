@@ -5,9 +5,9 @@ Created on Thu Sep 20 16:56:19 2018
 @author: Cobi
 """
 
-from sensor import Sensor
-from worldline import Worldline
-from location import Location
+from SlowerThanLight.sensor import Sensor
+from SlowerThanLight.worldline import Worldline
+from SlowerThanLight.location import Location
 import numpy as np
 import pygame
 import struct
