@@ -56,6 +56,7 @@ class ViewScreen:
         pygame.event.clear()
         if 'Q' in letters:  #hardcoded quit
             self.close()
+            return None
         return letters
 
 
