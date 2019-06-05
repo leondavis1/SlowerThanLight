@@ -43,10 +43,10 @@ class ViewScreen:
 
         if viewer.key is not None:
             viewer_phys = univ.get_physical(viewer.key)
-            viewer_phys.draw(self.screen, color=(0,255,0), radius=5)  #green is you
+            viewer_phys.draw(self.screen, color=None, radius=5)  #green is you
 
         for event in viewer.get_visible():
-            event.get_image().draw(self.screen, color= (0,0,255), radius=5)  #blue is you seeing them
+            event.get_image().draw(self.screen, color= None, radius=5)  #blue is you seeing them
 
         pygame.display.flip()
         
