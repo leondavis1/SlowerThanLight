@@ -104,4 +104,11 @@ class Worldline:
         
         return Event(Location(inter_t,inter_x[0],inter_x[1],inter_x[2]),prev.phystype,prev.descrip)  #should really interpolate description too....
         
-        
+    @property
+    def duration(self):
+        """
+        The length of the worldline, so things can know how
+        long they've existed for
+        :return:
+        """
+        return self.eventlist[-1].t - self.eventlist[0].t

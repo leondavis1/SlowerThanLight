@@ -27,7 +27,7 @@ class Physical:
     default_color = (255,255,255) # Default to white
     default_size = 5 # 5 px radius
 
-    def __init__(self, x, v, t, univ, isghost=False, watches=True):
+    def __init__(self, x, v, t, univ, isghost=False, watches=True, type_ = None):
         """
         :param x: Position of the Physical
         :param v: Velocity of the Physical
@@ -39,6 +39,9 @@ class Physical:
         attached to it, that tracks where it sees the other Physicals in this Universe.
         Defaults to True.
         """
+        if type_ is None:
+            type_ = type(self)
+        self._type = type_
         self.univ = univ
         self.loc = Location(t,x)
         self.v = np.array(v)
@@ -54,7 +57,7 @@ class Physical:
 
         if not isghost:
             worldline = Worldline(univ) #build new Worldline (it adds itself to to univ.History)
-            worldline.add_event(self.loc,type(self),self.compress())
+            worldline.add_event(self.loc, self._type, self.compress())
             self.linekey = worldline.key
             if watches:
                 self.sensor = Sensor(self.loc, univ, ownkey=self.linekey)
@@ -62,6 +65,17 @@ class Physical:
             for phys in univ.Physicals:
                 phys.watch_new_line(self.linekey)
             self.key = univ.add_physical(self)
+        self.color = self.default_color
+        self.size = self.default_size
+
+    @property
+    def duration(self):
+        """
+        How long this item has existed
+        """
+        if self.linekey is None:
+            return 0
+        return self.univ.get_worldline(self.linekey).duration
 
     def watch_new_line(self, key):
         if self.sensor is not None:
@@ -79,9 +93,11 @@ class Physical:
         assert(self.loc.dim() == len(self.v))
         self.loc.t += dt
         self.loc.x += self.v[0]*dt
-        if self.loc.dim()>=2: self.loc.y += self.v[1]*dt
-        if self.loc.dim()>=3: self.loc.z += self.v[2]*dt
-        self.univ.get_worldline(self.linekey).add_event(self.loc,type(self),self.compress())
+        if self.loc.dim() > 1:
+            self.loc.y += self.v[1]*dt
+        if self.loc.dim() > 2:
+            self.loc.z += self.v[2]*dt
+        self.univ.get_worldline(self.linekey).add_event(self.loc,self._type,self.compress())
         if self.sensor is not None:
             self.sensor.loc = self.loc  #update sensor so it knows where its Physical is
 
@@ -103,15 +119,11 @@ class Physical:
         """return a list of all Events that this Physical can see"""
         return self.sensor.get_visible()
 
-    def draw(self,screen, color=None, radius=None):
-        if radius is None:
-            radius = self.default_size
-        if color is None:
-            color = self.default_color
+    def draw(self, screen):
 
         loc = np.array([self.loc.x, self.loc.y]).astype(int)
 
-        pygame.draw.circle(screen, color, loc, radius)
+        pygame.draw.circle(screen, self.color, loc, self.size)
 ###-------------------------------------------------------------------------### BELOW THIS LINE IS STILL TO DO
     def __str__(self):
         """give enough info to reconstruct the Physical as it was at this
@@ -136,8 +148,8 @@ class Physical:
 
         return descrip
 
-    @staticmethod
-    def decompress(cipherstring):
+    @classmethod
+    def decompress(cls, cipherstring):
         """take in a compressed string following the compress method convention
         and returns a ghost Physical that matches the description.
         Note that this is a class method, NOT a instance method."""
@@ -148,5 +160,5 @@ class Physical:
         pos = info[1:ndim + 1]
         v = info[ndim + 1:(2*ndim)+1]
 
-        return Physical(pos, v, t, None, isghost=True)
+        return cls(pos, v, t, None, isghost=True)
 
