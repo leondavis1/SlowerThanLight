@@ -11,12 +11,20 @@ import pygame
 
 
 class ViewScreen:
-    def __init__(self, view_real=False):
+    """
+    Handles interfacing with pygame's screen representation
+    """
+    def __init__(self, view_real=False,size=(640, 480)):
+        """
+
+        :param view_real: when True, displays 'real' locations of all objects
+        :param size: Size of the window in pixels
+        """
         pygame.display.init()
         pygame.event.set_allowed(None)
         pygame.event.set_allowed(pygame.KEYDOWN)
         pygame.key.set_repeat(5,5)  #5 ms delay, 5 ms interval b/w KEYDOWN events
-        self.screen = pygame.display.set_mode((640, 400))  #type(screen) = pygame.Surface
+        self.screen = pygame.display.set_mode(size)  #type(screen) = pygame.Surface
         self.screen.fill((0,0,0))  #black
         self.view_real = view_real
 
@@ -39,14 +47,14 @@ class ViewScreen:
 
         if self.view_real:
             for thing in univ.Physicals:
-                thing.draw(self.screen,color=(255,0,0),radius=3) #red is real AND CHEATING
+                thing.draw(self.screen)  #red is real AND CHEATING
 
         if viewer.key is not None:
             viewer_phys = univ.get_physical(viewer.key)
-            viewer_phys.draw(self.screen, color=None, radius=5)  #green is you
+            viewer_phys.draw(self.screen)  #green is you
 
         for event in viewer.get_visible():
-            event.get_image().draw(self.screen, color= None, radius=5)  #blue is you seeing them
+            event.get_image().draw(self.screen)  #blue is you seeing them
 
         pygame.display.flip()
         
