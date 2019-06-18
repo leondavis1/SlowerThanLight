@@ -36,6 +36,7 @@ def profile(formatted_output=None):
             ps.sort_stats('tottime')
             ps.print_stats()
 
+
 def ship_controls(myship,keyspressed,step_size=1):
     step = step_size * .01
     if 'a' in keyspressed:
@@ -57,12 +58,14 @@ def main(args):
         keeplooping = True
         univ = Universe(lightspeed=1)
         myship = Physical((0, 0), (0, 0), 0, univ)
+        myship.color = (1, 0, 0)
         othership = Physical((100, 100), (0, 0), 0, univ, watches=False)
         scattered = []
 
-        for i in range(1000):
+        for i in range(10):
             p = Physical((i * 3, i * 3), (0, 0), 0, univ, watches=False)
             scattered.append(p)
+            p.color = (0,0,1)
 
         n=0
         avg_time = 0
